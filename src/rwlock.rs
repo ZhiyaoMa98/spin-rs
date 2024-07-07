@@ -381,6 +381,11 @@ impl<T: ?Sized, R> RwLock<T, R> {
                 data: unsafe { &mut *self.data.get() },
             })
         } else {
+            unsafe {
+                core::arch::asm!("nop");
+                core::arch::asm!("nop");
+                core::arch::asm!("nop");
+            }
             None
         }
     }
