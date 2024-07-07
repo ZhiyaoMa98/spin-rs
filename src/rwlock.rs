@@ -385,6 +385,9 @@ impl<T: ?Sized, R> RwLock<T, R> {
                 core::arch::asm!("nop");
                 core::arch::asm!("nop");
                 core::arch::asm!("nop");
+                core::arch::asm!("nop");
+                core::arch::asm!("nop");
+                core::arch::asm!("nop");
             }
             None
         }
