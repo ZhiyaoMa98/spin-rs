@@ -793,11 +793,24 @@ impl<'rwlock, T: ?Sized, R> Drop for RwLockWriteGuard<'rwlock, T, R> {
     fn drop(&mut self) {
         debug_assert_eq!(self.inner.lock.load(Ordering::Relaxed) & WRITER, WRITER);
 
+        loop {
+            let lock = self.inner.lock.load(Ordering::Relaxed);
+            let new_lock = lock & (!(WRITER | UPGRADED));
+            if let Ok(_) = self.inner.lock.compare_exchange_weak(
+                lock,
+                new_lock,
+                Ordering::Release,
+                Ordering::Relaxed,
+            ) {
+                break;
+            }
+        }
+
         // Writer is responsible for clearing both WRITER and UPGRADED bits.
         // The UPGRADED bit may be set if an upgradeable lock attempts an upgrade while this lock is held.
-        self.inner
-            .lock
-            .fetch_and(!(WRITER | UPGRADED), Ordering::Release);
+        // self.inner
+        //     .lock
+        //     .fetch_and(!(WRITER | UPGRADED), Ordering::Release);
     }
 }
 
