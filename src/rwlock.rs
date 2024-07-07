@@ -303,6 +303,11 @@ impl<T: ?Sized, R> RwLock<T, R> {
         if value & (WRITER | UPGRADED) != 0 {
             // Lock is taken, undo.
             self.lock.fetch_sub(READER, Ordering::Release);
+            unsafe {
+                core::arch::asm!("nop");
+                core::arch::asm!("nop");
+                core::arch::asm!("nop");
+            }
             None
         } else {
             Some(RwLockReadGuard {
